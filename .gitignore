@@ -38,3 +38,4 @@ MANIFEST
 .DS_Store
 Thumbs.db
 
+src/__marimo__/

@@ -1,3 +1,5 @@
+import datetime
+
 import marimo
 
 __generated_with = "0.25.1"
@@ -111,8 +113,17 @@ def _(df_inflation, pl):
 
 @app.cell
 def _(df_inflation, df_since_sept, pl):
-    # Get latest available row for overall inflation/wages
-    latest_row = df_inflation.tail(1).row(0, named=True)
+    fmt = lambda v: f"{v:.2f}%" if v is not None else "N/A"
+
+    # Get latest complete row where inflation metrics are published
+    latest_row = (
+        df_inflation.filter(
+            pl.col("headline_inflation").is_not_null()
+            & pl.col("core_inflation").is_not_null()
+        )
+        .tail(1)
+        .row(0, named=True)
+    )
 
     # Find peak headline inflation and when it occurred
     peak_row = df_inflation.filter(
@@ -124,14 +135,14 @@ def _(df_inflation, df_since_sept, pl):
 
     print("=== WORKSHEET ANSWERS ===")
     print(f"1. Latest Date in Dataset: {latest_row['date']}")
-    print(f"2. Latest Headline Inflation: {latest_row['headline_inflation']:.2f}%")
-    print(f"3. Latest Core Inflation: {latest_row['core_inflation']:.2f}%")
+    print(f"2. Latest Headline Inflation: {fmt(latest_row['headline_inflation'])}")
+    print(f"3. Latest Core Inflation: {fmt(latest_row['core_inflation'])}")
     print(
-        f"4. Peak Headline Inflation: {peak_row['headline_inflation']:.2f}% (in {peak_row['date']})"
+        f"4. Peak Headline Inflation: {fmt(peak_row['headline_inflation'])} (in {peak_row['date']})"
     )
     print(f"5. Since Sept 2025 (Latest month: {latest_since_sept['date']}):")
-    print(f"   - Prices are up: {latest_since_sept['price_change']:.2f}%")
-    print(f"   - Wages are up: {latest_since_sept['wage_change']:.2f}%")
+    print(f"   - Prices are up: {fmt(latest_since_sept['price_change'])}")
+    print(f"   - Wages are up: {fmt(latest_since_sept['wage_change'])}")
 
 
 @app.cell
